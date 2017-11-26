@@ -38,33 +38,37 @@ class RGBA(val width: Int, val height: Int) {
         return img
     }
 
-    fun replace(from: RGBA, to: RGBA) {
-        if (from.width == 0 || from.height == 0 || to.width == 0 || to.height == 0) {
-            return
-        }
+    fun findAll(sub: RGBA): List<Rect> {
+        val subWidth = sub.width
+        val subHeight = sub.height
 
-        data class Rect(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
-            infix fun overlaps(other: Rect): Boolean {
-                return (other.x1 in x1 until x2 || other.x2 in x1 until x2)
-                        && (other.y1 in y1 until y2 || other.y2 in y1 until y2)
-            }
+        if (subWidth == 0 || subHeight == 0) {
+            return listOf()
         }
 
         val positions = mutableListOf<Rect>()
+        val imax = 1 + width - subWidth
+        val jmax = 1 + height - subHeight
 
-        val imax = 1 + width - from.width
-        val jmax = 1 + height - from.height
         for (j in 0 until jmax) {
             for (i in 0 until imax) {
-                val rect = Rect(i, j, i + from.width, j + from.height)
+                val rect = Rect(i, j, i + subWidth, j + subHeight)
                 if (!positions.any { it overlaps rect }) {
-                    if (regionEquals(i, j, from)) {
+                    if (regionEquals(i, j, sub)) {
                         positions += rect
                     }
                 }
             }
         }
+        return positions
+    }
 
+    fun replace(from: RGBA, to: RGBA) {
+        if (from.width == 0 || from.height == 0 || to.width == 0 || to.height == 0) {
+            return
+        }
+
+        val positions = findAll(from)
         for ((x, y) in positions) {
             draw(x, y, to)
         }
@@ -103,5 +107,12 @@ class RGBA(val width: Int, val height: Int) {
         val g = mixChannel(old, new, 8, alpha)
         val b = mixChannel(old, new, 0, alpha)
         return (a shl 24) or (r shl 16) or (g shl 8) or b
+    }
+
+    data class Rect(val x1: Int, val y1: Int, val x2: Int, val y2: Int) {
+        infix fun overlaps(other: Rect): Boolean {
+            return (other.x1 in x1 until x2 || other.x2 in x1 until x2)
+                    && (other.y1 in y1 until y2 || other.y2 in y1 until y2)
+        }
     }
 }
