@@ -40,9 +40,9 @@ class SwingGui {
     }
 
     fun run() {
-        val sourceButton = newOpenButton("Source", { img -> source = img })
-        val replaceButton = newOpenButton("Replace", { img -> replace = img })
-        val withButton = newOpenButton("With", { img -> with = img })
+        val sourceButton = newOpenButton("Source") { img -> source = img }
+        val replaceButton = newOpenButton("Replace") { img -> replace = img }
+        val withButton = newOpenButton("With") { img -> with = img }
         val saveButton = newSaveButton("Save")
 
         val buttonBar = JPanel()
